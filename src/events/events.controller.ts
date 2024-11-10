@@ -22,6 +22,11 @@ export class EventsController {
     return this.eventsService.findOne(+id);
   }
 
+  @Get(':id/activities')
+  findActivities(@Param('id') id: string) {
+    return this.eventsService.findActivities(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
     return this.eventsService.update(+id, updateEventDto);
