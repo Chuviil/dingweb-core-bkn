@@ -22,6 +22,8 @@ model Events {
   embeddings  Unsupported("vector(1536)")
 
   activities Activities[] @relation("EventActivities")
+
+  @@index([embeddings], name: "Events_embeddings_idx")
 }
 
 model Activities {
