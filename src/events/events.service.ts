@@ -2,7 +2,7 @@ import {Injectable} from '@nestjs/common';
 import {CreateEventDto} from './dto/create-event.dto';
 import {UpdateEventDto} from './dto/update-event.dto';
 import {PrismaService} from "../prisma/prisma.service";
-import {Events, Prisma} from "@prisma/client";
+import {Activities, Events} from "@prisma/client";
 import {OpenaiService} from "../openai/openai.service";
 
 @Injectable()
@@ -11,7 +11,7 @@ export class EventsService {
     }
 
     async create(createEventDto: CreateEventDto): Promise<Events> {
-        const { title, description, start_date, end_date } = createEventDto;
+        const {title, description, start_date, end_date} = createEventDto;
 
         const embeddings = await this.openaiembeddings.embedQuery(`${title} ${description}`) as unknown as string;
 
@@ -28,6 +28,10 @@ export class EventsService {
 
     async findOne(id: number): Promise<Events> {
         return this.prisma.events.findUnique({where: {id}})
+    }
+
+    async findActivities(id: number): Promise<Activities[]> {
+        return this.prisma.activities.findMany({where: {event_id: id}})
     }
 
     async update(id: number, updateEventDto: UpdateEventDto) {
