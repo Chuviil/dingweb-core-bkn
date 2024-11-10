@@ -20,4 +20,17 @@ model Events {
   start_date  DateTime
   end_date    DateTime
   embeddings  Unsupported("vector(1536)")
+
+  activities Activities[] @relation("EventActivities")
+}
+
+model Activities {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  start_date  DateTime
+  end_date    DateTime
+  event_id    Int
+
+  event Events @relation("EventActivities", fields: [event_id], references: [id])
 }
