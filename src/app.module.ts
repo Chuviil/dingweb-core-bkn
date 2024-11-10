@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { EventsModule } from './events/events.module';
+import { PrismaService } from './prisma/prisma.service';
+import { PrismaModule } from './prisma/prisma.module';
+import { OpenaiService } from './openai/openai.service';
+import { OpenaiModule } from './openai/openai.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [EventsModule, PrismaModule, OpenaiModule],
+  controllers: [],
+  providers: [PrismaService, OpenaiService],
 })
 export class AppModule {}
