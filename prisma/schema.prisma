@@ -37,3 +37,12 @@ model Activities {
 
   event Events @relation("EventActivities", fields: [event_id], references: [id])
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
