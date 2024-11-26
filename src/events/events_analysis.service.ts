@@ -1,21 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {PrismaService} from "../prisma/prisma.service";
 import {AnalyzeEventDto} from "./dto/analyze-event.dto";
 
 @Injectable()
 export class EventAnalysisService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(private readonly prisma: PrismaService) {
+    }
 
-    /**
-     * Analyzes the most similar event based on the provided details of the new event.
-     * @param newEventDetails - Details of the new event.
-     */
     async analyzeSimilarity(newEventDetails: AnalyzeEventDto) {
-        const { locationLat, locationLon, tags } = newEventDetails;
+        const {locationLat, locationLon, tags} = newEventDetails;
 
         // Fetch all events to calculate similarity
         const events = await this.prisma.event.findMany({
-            include: { tags: true },
+            include: {tags: true},
         });
 
         let mostSimilarEvent = null;
@@ -41,11 +38,6 @@ export class EventAnalysisService {
         };
     }
 
-    /**
-     * Calculates tag similarity using a Jaccard-like approach.
-     * @param tags1 - Tags of the new event.
-     * @param tags2 - Tags of an existing event.
-     */
     private calculateTagSimilarity(tags1: string[], tags2: string[]): number {
         const set1 = new Set(tags1);
         const set2 = new Set(tags2);
@@ -56,13 +48,6 @@ export class EventAnalysisService {
         return union === 0 ? 0 : intersection / union;
     }
 
-    /**
-     * Calculates location similarity based on geographical distance.
-     * @param lat1 - Latitude of the new event.
-     * @param lon1 - Longitude of the new event.
-     * @param lat2 - Latitude of the existing event.
-     * @param lon2 - Longitude of the existing event.
-     */
     private calculateLocationSimilarity(lat1: number, lon1: number, lat2: number, lon2: number): number {
         if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
             return 0; // Return 0 similarity if any location is missing
@@ -74,13 +59,6 @@ export class EventAnalysisService {
         return Math.max(0, 1 - distance / maxDistance); // Normalize to a range of 0 to 1
     }
 
-    /**
-     * Calculates distance between two geographical points using the Haversine formula.
-     * @param lat1 - Latitude of the first point.
-     * @param lon1 - Longitude of the first point.
-     * @param lat2 - Latitude of the second point.
-     * @param lon2 - Longitude of the second point.
-     */
     private getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
         const R = 6371; // Radius of the Earth in kilometers
         const dLat = this.deg2rad(lat2 - lat1);
@@ -94,10 +72,6 @@ export class EventAnalysisService {
         return R * c; // Distance in kilometers
     }
 
-    /**
-     * Converts degrees to radians.
-     * @param deg - Angle in degrees.
-     */
     private deg2rad(deg: number): number {
         return deg * (Math.PI / 180);
     }
