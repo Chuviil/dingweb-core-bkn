@@ -1,10 +1,12 @@
 import {Body, Controller, Get, Param, Post} from '@nestjs/common';
 import {EventsService} from './events.service';
 import {CreateEventDto} from './dto/create-event.dto';
+import {EventAnalysisService} from "./events_analysis.service";
+import {AnalyzeEventDto} from "./dto/analyze-event.dto";
 
 @Controller('events')
 export class EventsController {
-    constructor(private readonly eventsService: EventsService) {
+    constructor(private readonly eventsService: EventsService, private readonly eventAnalysisService: EventAnalysisService) {
     }
 
     @Post()
@@ -18,12 +20,7 @@ export class EventsController {
     }
 
     @Get('similar')
-    findMostSimilarEvent(@Param('id') id: string) {
-        return this.eventsService.findMostSimilarEvent(+id);
-    }
-
-    @Get('popular-activities')
-    findMostPopularActivities(@Param('id') id: string) {
-        return this.eventsService.findMostPopularActivities(+id);
+    findMostSimilarEvent(@Body() analyzeEventDto: AnalyzeEventDto) {
+        return this.eventAnalysisService.analyzeSimilarity(analyzeEventDto);
     }
 }
