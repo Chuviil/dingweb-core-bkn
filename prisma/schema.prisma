@@ -14,35 +14,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Events {
-  id          Int                         @id @default(autoincrement())
-  title       String
-  description String
-  start_date  DateTime
-  end_date    DateTime
-  embeddings  Unsupported("vector(1536)")
-
-  activities Activities[] @relation("EventActivities")
-
-  @@index([embeddings], name: "Events_embeddings_idx")
-}
-
-model Activities {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  start_date  DateTime
-  end_date    DateTime
-  event_id    Int
-
-  event Events @relation("EventActivities", fields: [event_id], references: [id])
-}
-
 model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  events        Event[]        @relation("UserEvents")
+  registrations Registration[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Event {
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String
+  date          DateTime
+  location      String
+  locationLat   Float?
+  locationLon   Float?
+  activities    Activity[]
+  tags          Tag[]
+  registrations Registration[]
+  organizer     User?          @relation("UserEvents", fields: [organizerId], references: [id])
+  organizerId   Int?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Activity {
+  id            Int            @id @default(autoincrement())
+  name          String
+  description   String
+  capacity      Int
+  eventId       Int
+  event         Event          @relation(fields: [eventId], references: [id])
+  registrations Registration[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Registration {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  eventId    Int?
+  activityId Int?
+  user       User      @relation(fields: [userId], references: [id])
+  event      Event?    @relation(fields: [eventId], references: [id])
+  activity   Activity? @relation(fields: [activityId], references: [id])
+  createdAt  DateTime  @default(now())
+}
+
+model Tag {
   id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
-  role      String
+  name      String   @unique
+  events    Event[]
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
