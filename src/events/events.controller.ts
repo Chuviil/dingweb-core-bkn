@@ -1,26 +1,48 @@
-import {Body, Controller, Get, Param, Post} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post,} from '@nestjs/common';
 import {EventsService} from './events.service';
-import {CreateEventDto} from './dto/create-event.dto';
 import {EventAnalysisService} from "./events_analysis.service";
+import {CreateEventDto} from "./dto/create-event.dto";
+import {UpdateEventDto} from "./dto/update-event.dto";
 import {AnalyzeEventDto} from "./dto/analyze-event.dto";
 
 @Controller('events')
 export class EventsController {
-    constructor(private readonly eventsService: EventsService, private readonly eventAnalysisService: EventAnalysisService) {
+    constructor(
+        private readonly eventsService: EventsService,
+        private readonly eventAnalysisService: EventAnalysisService,
+    ) {
     }
 
     @Post()
-    create(@Body() createEventDto: CreateEventDto) {
+    async create(@Body() createEventDto: CreateEventDto) {
         return this.eventsService.create(createEventDto);
     }
 
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.eventsService.findOne(+id);
+    @Get()
+    async findAll() {
+        return this.eventsService.findAll();
     }
 
-    @Get('similar')
-    findMostSimilarEvent(@Body() analyzeEventDto: AnalyzeEventDto) {
-        return this.eventAnalysisService.analyzeSimilarity(analyzeEventDto);
+    @Get(':id')
+    async findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.eventsService.findOne(id);
+    }
+
+    @Patch(':id')
+    async update(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateEventDto: UpdateEventDto,
+    ) {
+        return this.eventsService.update(id, updateEventDto);
+    }
+
+    @Delete(':id')
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        return this.eventsService.remove(id);
+    }
+
+    @Post('similar')
+    async findSimilar(@Body() newEventDetails: AnalyzeEventDto) {
+        return this.eventAnalysisService.analyzeSimilarity(newEventDetails);
     }
 }
