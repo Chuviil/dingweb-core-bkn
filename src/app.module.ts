@@ -7,9 +7,10 @@ import {UsersModule} from './users/users.module';
 import {EventsModule} from './events/events.module';
 import {ActivitiesModule} from './activities/activities.module';
 import {RegistrationsModule} from './registrations/registrations.module';
+import {AuthModule} from './auth/auth.module';
 
 @Module({
-    imports: [PrismaModule, OpenaiModule, UsersModule, EventsModule, ActivitiesModule, RegistrationsModule],
+    imports: [PrismaModule, OpenaiModule, UsersModule, EventsModule, ActivitiesModule, RegistrationsModule, AuthModule],
     controllers: [],
     providers: [PrismaService, OpenaiService],
 })
