@@ -1,31 +1,77 @@
-import { Injectable } from '@nestjs/common';
-import { UpdateActivityDto } from './dto/update-activity.dto';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../prisma/prisma.service";
 import {CreateActivityDto} from "./dto/create-activity.dto";
-import {Activities} from "@prisma/client";
+import {UpdateActivityDto} from "./dto/update-activity.dto";
 
 @Injectable()
 export class ActivitiesService {
-  constructor(private prisma: PrismaService) {
-  }
+    constructor(private readonly prisma: PrismaService) {
+    }
 
-  async create(createActivityDto: CreateActivityDto): Promise<Activities> {
-    return this.prisma.activities.create({data: createActivityDto});
-  }
+    async create(createActivityDto: CreateActivityDto) {
+        const {eventId, name, description, capacity} = createActivityDto;
 
-  async findAll() {
-    return this.prisma.activities.findMany();
-  }
+        // Check if the associated event exists
+        const event = await this.prisma.event.findUnique({
+            where: {id: eventId},
+        });
+        if (!event) {
+            throw new NotFoundException(`Event with ID ${eventId} not found`);
+        }
 
-  async findOne(id: number) {
-    return this.prisma.activities.findUnique({where: {id}});
-  }
+        // Create the activity
+        return this.prisma.activity.create({
+            data: {
+                name,
+                description,
+                capacity,
+                eventId,
+            },
+        });
+    }
 
-  async update(id: number, updateActivityDto: UpdateActivityDto) {
-    return this.prisma.activities.update({where: {id}, data: updateActivityDto});
-  }
+    async findAll(eventId: number) {
+        // Find all activities for a specific event
+        return this.prisma.activity.findMany({
+            where: {eventId},
+            include: {registrations: true},
+        });
+    }
 
-  async remove(id: number) {
-    return this.prisma.activities.delete({where: {id}});
-  }
+    async findOne(id: number) {
+        // Find a specific activity
+        const activity = await this.prisma.activity.findUnique({
+            where: {id},
+            include: {event: true, registrations: true},
+        });
+        if (!activity) {
+            throw new NotFoundException(`Activity with ID ${id} not found`);
+        }
+        return activity;
+    }
+
+    async update(id: number, updateActivityDto: UpdateActivityDto) {
+        // Check if the activity exists
+        const activity = await this.prisma.activity.findUnique({where: {id}});
+        if (!activity) {
+            throw new NotFoundException(`Activity with ID ${id} not found`);
+        }
+
+        // Update the activity
+        return this.prisma.activity.update({
+            where: {id},
+            data: updateActivityDto,
+        });
+    }
+
+    async remove(id: number) {
+        // Check if the activity exists
+        const activity = await this.prisma.activity.findUnique({where: {id}});
+        if (!activity) {
+            throw new NotFoundException(`Activity with ID ${id} not found`);
+        }
+
+        // Delete the activity
+        return this.prisma.activity.delete({where: {id}});
+    }
 }

@@ -1,5 +1,6 @@
-// export class CreateEventDto {}
-
-import {Activities} from "@prisma/client";
-
-export type CreateActivityDto = Omit<Activities, 'id'>;
+export class CreateActivityDto {
+    name: string;
+    description: string;
+    capacity: number;
+    eventId: number;
+}
