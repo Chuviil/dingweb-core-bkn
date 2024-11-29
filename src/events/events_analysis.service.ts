@@ -10,7 +10,6 @@ export class EventAnalysisService {
     async analyzeSimilarity(newEventDetails: AnalyzeEventDto) {
         const {locationLat, locationLon, tags} = newEventDetails;
 
-        // Fetch all events to calculate similarity
         const events = await this.prisma.event.findMany({
             include: {tags: true},
         });
@@ -18,12 +17,10 @@ export class EventAnalysisService {
         let mostSimilarEvent = null;
         let highestSimilarityScore = 0;
 
-        // Iterate through each event to calculate similarity score
         for (const event of events) {
             const tagScore = this.calculateTagSimilarity(tags, event.tags.map((tag) => tag.name));
             const locationScore = this.calculateLocationSimilarity(locationLat, locationLon, event.locationLat, event.locationLon);
 
-            // Weight for scoring (you can adjust these weights)
             const similarityScore = tagScore * 0.6 + locationScore * 0.4;
 
             if (similarityScore > highestSimilarityScore) {
@@ -50,17 +47,17 @@ export class EventAnalysisService {
 
     private calculateLocationSimilarity(lat1: number, lon1: number, lat2: number, lon2: number): number {
         if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
-            return 0; // Return 0 similarity if any location is missing
+            return 0;
         }
 
         const distance = this.getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2);
-        const maxDistance = 500; // Set a max distance threshold for scoring
+        const maxDistance = 500;
 
-        return Math.max(0, 1 - distance / maxDistance); // Normalize to a range of 0 to 1
+        return Math.max(0, 1 - distance / maxDistance);
     }
 
     private getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-        const R = 6371; // Radius of the Earth in kilometers
+        const R = 6371;
         const dLat = this.deg2rad(lat2 - lat1);
         const dLon = this.deg2rad(lon2 - lon1);
         const a =
@@ -69,7 +66,7 @@ export class EventAnalysisService {
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in kilometers
+        return R * c;
     }
 
     private deg2rad(deg: number): number {
